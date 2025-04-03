@@ -12,7 +12,7 @@ namespace Esadad.Core.Entities
     public class EsadadPaymentLog
     {
         [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+      
         public long Id { get; set; }
 
         [Required]
@@ -104,5 +104,6 @@ namespace Esadad.Core.Entities
         [Required]
         [Column(TypeName = "datetime")]
         public DateTime InsertDate { get; set; }= DateTime.Now;
+       
     }
 }

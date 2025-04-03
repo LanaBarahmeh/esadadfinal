@@ -36,7 +36,10 @@ namespace EsadadAPI.Controllers
 
             var tranLog = _commonService.InsertLog(TransactionTypeEnum.Request.ToString(), ApiTypeEnum.ReceivePaymentNotification.ToString(), guid.ToString(), xmlElement);
 
-            PaymentNotificationResponse paymentNotificationResponse;
+
+            //Log to EsadadOaymentsLogs Table
+
+            PaymentNotificationResponseDto paymentNotificationResponse;
 
             if (!DigitalSignature.VerifySignature(xmlElement))
             {

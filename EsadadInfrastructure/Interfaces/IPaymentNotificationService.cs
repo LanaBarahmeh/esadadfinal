@@ -5,8 +5,8 @@ namespace Esadad.Infrastructure.Interfaces
 {
     public interface IPaymentNotificationService
     {
-        public PaymentNotificationResponse GetPaymentNotificationResponse(Guid guid, string billingNumber, string serviceType, PaymentNotificationResponseTrxInf paymentNotificationRequestTrxInf, XmlElement xmlElement);
+        public PaymentNotificationResponseDto GetPaymentNotificationResponse(Guid guid, string billingNumber, string serviceType, PaymentNotificationResponseTrxInf paymentNotificationRequestTrxInf, XmlElement xmlElement);
 
-        public PaymentNotificationResponse GetInvalidSignatureResponse(Guid guid, string billingNumber, string serviceType, XmlElement xmlElement);
+        public PaymentNotificationResponseDto GetInvalidSignatureResponse(Guid guid, string billingNumber, string serviceType, XmlElement xmlElement);
     }
 }

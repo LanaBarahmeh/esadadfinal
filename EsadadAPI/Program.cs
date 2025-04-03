@@ -23,7 +23,7 @@ builder.Services.AddSwaggerGen();
 
 // Add services to the container.
 builder.Services.AddDbContext<EsadadIntegrationDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("EsadadDBConnectionString")));
+    options.UseOracle(builder.Configuration.GetConnectionString("EsadadDBConnectionString")));
 
 //builder.Services.AddDbContext<EsadadContext>(options => options.UseSqlServer(builder.Configuration.GetSection("ConnectionStrings").Value));
 
@@ -41,6 +41,8 @@ builder.Services.AddSingleton<IOptionsMonitor<Certificates>, OptionsMonitor<Cert
 builder.Services.AddTransient<IBillPullService, BillPullService>();
 builder.Services.AddTransient<IPaymentNotificationService, PaymentNotificationService>();
 builder.Services.AddTransient<ICommonService, CommonService>();
+builder.Services.AddTransient<IPrepaidValidationService, PrepaidValidationService>();
+
 
 var app = builder.Build();
 

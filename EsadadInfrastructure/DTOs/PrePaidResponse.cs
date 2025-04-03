@@ -3,7 +3,7 @@
 namespace Esadad.Infrastructure.DTOs
 {
     [XmlRoot(ElementName = "MFEP")]
-    public class PrePaidResponse
+    public class PrePaidResponseDto
     {
         [XmlElement(ElementName = "MsgHeader")]
         public MsgHeader MsgHeader { get; set; }
@@ -25,18 +25,18 @@ namespace Esadad.Infrastructure.DTOs
     [XmlRoot(ElementName = "BillingInfo")]
     public class BillingInfo
     {
-
         [XmlElement(ElementName = "Result")]
         public Result Result { get; set; }
 
         [XmlElement(ElementName = "AcctInfo")]
-        public AcctInfo AcctInfo { get; set; }
+        public PrepaidAcctInfo AcctInfo { get; set; }
 
         [XmlElement(ElementName = "DueAmt")]
         public decimal DueAmt { get; set; }
 
         [XmlElement(ElementName = "Currency")]
         public string Currency { get; set; }
+
         [XmlElement(ElementName = "ValidationCode")]
         public int ValidationCode { get; set; }
 
@@ -45,8 +45,8 @@ namespace Esadad.Infrastructure.DTOs
 
         [XmlElement(ElementName = "SubPmts")]
         public SubPmts SubPmts { get; set; }
+
+        [XmlElement(ElementName = "AdditionalInfo")]
+        public AdditionalInfo AdditionalInfo { get; set; }
     }
-
-   
-
 }

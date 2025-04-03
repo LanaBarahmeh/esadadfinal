@@ -1,5 +1,6 @@
 ﻿using Esadad.Infrastructure.DTOs;
 using Esadad.Infrastructure.Enums;
+using Esadad.Infrastructure.Helpers;
 using Esadad.Infrastructure.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -8,16 +9,18 @@ using System.Xml;
 namespace EsadadAPI.Controllers
 {
     [Route("api/[controller]")]
+    [Consumes("application/xml")]
+    [Produces("application/xml")]
     [ApiController]
     public class PrepaidController : ControllerBase
     {
         // private readonly IBillPullService _billPullService;
         //IBillPullService billPullService,
         private readonly ICommonService _commonService;
-
-        public PrepaidController( ICommonService commonService)
+        private readonly IPrepaidValidationService _prepaidValidationService;
+        public PrepaidController(IPrepaidValidationService prepaidValidationService, ICommonService commonService)
         {
-           // _billPullService = billPullService;
+            _prepaidValidationService = prepaidValidationService;
             _commonService = commonService;
         }
 
@@ -32,27 +35,30 @@ namespace EsadadAPI.Controllers
             // Log Request 
             string? billingNumber = xmlElement.SelectSingleNode("//BillingNo")?.InnerText;
             string? serviceType = xmlElement.SelectSingleNode("//ServiceType")?.InnerText;
+            string? prepaidCat = xmlElement.SelectSingleNode("//PrepaidCat")?.InnerText;
+            int validatioCode = int.Parse(xmlElement.SelectSingleNode("//ValidationCode")?.InnerText);
 
             //Log to EsadadTransactionsLogs Table
-            var tranLog = _commonService.InsertLog(TransactionTypeEnum.Request.ToString(), ApiTypeEnum.PrepaidValidationWithCategory.ToString(), guid.ToString(), xmlElement);
+            var tranLog = _commonService.InsertLog(TransactionTypeEnum.Request.ToString(), ApiTypeEnum.PrepaidValidation.ToString(), guid.ToString(), xmlElement);
 
-            //BillPullResponse billPullResponse = null;
-            //if (!DigitalSignature.VerifySignature(xmlElement))
-            //{
+            PrePaidResponseDto prePaidResponseDto = null;
+            if (!DigitalSignature.VerifySignature(xmlElement))
+            {
 
-            //    billPullResponse = _billPullService.GetInvalidSignatureResponse(guid, billingNumber, serviceType);
+                prePaidResponseDto = _prepaidValidationService.GetInvalidSignatureResponse(guid, billingNumber, serviceType, prepaidCat, validatioCode);
 
-            //    return Ok(billPullResponse);
-            //}
-            //else
-            //{
-            //    //Log Response
-            //    billPullResponse = _billPullService.BillPull(guid, xmlElement);
-            //    return Ok(billPullResponse);
-            //}
+                return Ok(prePaidResponseDto);
+            }
+            else
+            {
+                //Log Response
+                prePaidResponseDto = _prepaidValidationService.GetResponse(guid, xmlElement);
+
+                return Ok(prePaidResponseDto);
+            }
 
 
-            return Ok(new PrePaidResponse());
+            return Ok(new PrePaidResponseDto());
 
         }
 

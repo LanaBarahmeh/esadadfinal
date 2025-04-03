@@ -18,7 +18,7 @@ namespace Esadad.Infrastructure.DTOs
         public MsgBody MsgBody { get; set; }
 
         [XmlElement(ElementName = "MsgFooter")]
-    
+
         public MsgFooter MsgFooter { get; set; }
     }
 
@@ -34,32 +34,32 @@ namespace Esadad.Infrastructure.DTOs
         [XmlElement("PayerInfo")]
         public PayerInfo PayerInfo { get; set; }
     }
-    [Serializable]
-    public class PayerInfo
-    {
-        [XmlElement("IdType")]
-        public string IdType { get; set; }
+    //[Serializable]
+    //public class PayerInfo
+    //{
+    //    [XmlElement("IdType")]
+    //    public string IdType { get; set; }
 
-        [XmlElement("Id")]
-        public string Id { get; set; }
+    //    [XmlElement("Id")]
+    //    public string Id { get; set; }
 
-        [XmlElement("Nation")]
-        public string Nation { get; set; }
+    //    [XmlElement("Nation")]
+    //    public string Nation { get; set; }
 
-       [XmlElement("Name")]
-        public string Name { get; set; }
+    //   [XmlElement("Name")]
+    //    public string Name { get; set; }
 
-        [XmlElement("Phone")]
-        public string Phone { get; set; }
+    //    [XmlElement("Phone")]
+    //    public string Phone { get; set; }
 
-       [XmlElement("Address")]
-        public string Address { get; set; }
+    //   [XmlElement("Address")]
+    //    public string Address { get; set; }
 
-        [XmlElement("Email")]
-        public string Email { get; set; }
+    //    [XmlElement("Email")]
+    //    public string Email { get; set; }
 
-        [XmlElement("JOEBPPSNo")]
-        public int JOEBPPSNo { get; set; }
-    }
+    //    [XmlElement("JOEBPPSNo")]
+    //    public int JOEBPPSNo { get; set; }
+    //}
 
 }

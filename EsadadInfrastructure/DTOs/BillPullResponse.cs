@@ -62,6 +62,9 @@ namespace Esadad.Infrastructure.DTOs
 
         [XmlElement(ElementName = "SubPmts")]
         public SubPmts SubPmts { get; set; }
+
+        [XmlElement(ElementName = "AdditionalInfo")]
+        public AdditionalInfo AdditionalInfo { get; set; }
     }
 
     public class PmtConst
@@ -76,5 +79,5 @@ namespace Esadad.Infrastructure.DTOs
         public decimal Upper { get; set; }
     }
 
-   
+
 }

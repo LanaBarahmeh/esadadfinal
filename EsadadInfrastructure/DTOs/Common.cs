@@ -91,6 +91,20 @@ namespace Esadad.Infrastructure.DTOs
         [XmlElement(ElementName = "PrepaidCat")]
         public string PrepaidCat { get; set; }
     }
+
+    [XmlRoot(ElementName = "AdditionalInfo")]
+    [Serializable]
+    public class AdditionalInfo
+    {
+        [XmlElement(ElementName = "CustName")]
+        public string CustName { get; set; }
+
+        [XmlElement(ElementName = "FreeText")]
+        public string FreeText { get; set; }
+    }
+
+
+
     #region Request 
     [Serializable]
     public class RequestMsgHeader
@@ -113,6 +127,46 @@ namespace Esadad.Infrastructure.DTOs
         [XmlElement(ElementName = "ReqTyp")]
         public string ReqTyp { get; set; } // Mandatory, String, Up to 15 chars
 
+    }
+
+    [Serializable]
+    public class PayerInfo
+    {
+        [XmlElement("IdType")]
+        public string IdType { get; set; }
+
+        [XmlElement("Id")]
+        public string Id { get; set; }
+
+        [XmlElement("Nation")]
+        public string Nation { get; set; }
+
+        [XmlElement("Name")]
+        public string Name { get; set; }
+
+        [XmlElement("Phone")]
+        public string Phone { get; set; }
+
+        [XmlElement("Address")]
+        public string Address { get; set; }
+
+        [XmlElement("Email")]
+        public string Email { get; set; }
+
+        [XmlElement("JOEBPPSNo")]
+        public int JOEBPPSNo { get; set; }
+    }
+    #endregion
+
+    #region Prepaid
+    [Serializable]
+    public class PrepaidAcctInfo
+    {
+        [XmlElement(ElementName = "BillingNo")]
+        public string BillingNo { get; set; }
+
+        [XmlElement(ElementName = "BillerCode")]
+        public int BillerCode { get; set; }
     }
     #endregion
 }

@@ -3,7 +3,7 @@
 namespace Esadad.Infrastructure.DTOs
 {
     [XmlRoot(ElementName = "MFEP")]
-    public class PaymentNotificationResponse
+    public class PaymentNotificationResponseDto
     {
         [XmlElement(ElementName = "MsgHeader")]
         public MsgHeader MsgHeader { get; set; }
