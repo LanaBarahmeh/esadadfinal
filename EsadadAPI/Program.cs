@@ -3,8 +3,11 @@ using Esadad.Infrastructure.Interfaces;
 using Esadad.Infrastructure.MemCache;
 using Esadad.Infrastructure.Persistence;
 using Esadad.Infrastructure.Services;
+using log4net.Config;
+using log4net;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -42,6 +45,21 @@ builder.Services.AddTransient<IBillPullService, BillPullService>();
 builder.Services.AddTransient<IPaymentNotificationService, PaymentNotificationService>();
 builder.Services.AddTransient<ICommonService, CommonService>();
 builder.Services.AddTransient<IPrepaidValidationService, PrepaidValidationService>();
+
+
+GlobalContext.Properties["host"] = Environment.MachineName;
+
+// Reference the log4net.config from Project2 output folder
+var logRepository = LogManager.GetRepository(Assembly.GetEntryAssembly());
+
+// Ensure the log4net.config file is available in the output directory
+var log4netConfigPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "log4net.config");
+
+if (File.Exists(log4netConfigPath))
+{
+    // Configure log4net with the log4net.config file
+    XmlConfigurator.Configure(logRepository, new FileInfo(log4netConfigPath));
+}
 
 
 var app = builder.Build();
