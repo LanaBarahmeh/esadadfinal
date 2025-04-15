@@ -2,6 +2,7 @@
 using Esadad.Infrastructure.Enums;
 using Esadad.Infrastructure.Helpers;
 using Esadad.Infrastructure.Interfaces;
+using log4net;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Xml;
@@ -19,6 +20,8 @@ namespace EsadadAPI.Controllers
         //IBillPullService billPullService,
         private readonly ICommonService _commonService;
         private readonly IPrepaidValidationService _prepaidValidationService;
+        private static readonly ILog log = LogManager.GetLogger("Task");
+
         public PrepaidController(IPrepaidValidationService prepaidValidationService, ICommonService commonService)
         {
             _prepaidValidationService = prepaidValidationService;
@@ -39,29 +42,42 @@ namespace EsadadAPI.Controllers
             string? prepaidCat = xmlElement.SelectSingleNode("//PrepaidCat")?.InnerText;
             int validatioCode = int.Parse(xmlElement.SelectSingleNode("//ValidationCode")?.InnerText);
 
+            try
+            {
+
+            
             //Log to EsadadTransactionsLogs Table
             var tranLog = _commonService.InsertLog(TransactionTypeEnum.Request.ToString(), ApiTypeEnum.PrepaidValidation.ToString(), guid.ToString(), xmlElement);
 
             PrePaidResponseDto prePaidResponseDto = null;
+
             if (!DigitalSignature.VerifySignature(xmlElement))
             {
-
+                    log.Info("Digital signature is invalid");
                 prePaidResponseDto = _prepaidValidationService.GetInvalidSignatureResponse(guid, billingNumber, serviceType, prepaidCat, validatioCode);
 
                 return Ok(prePaidResponseDto);
             }
             else
             {
-                //Log Response
-                prePaidResponseDto = _prepaidValidationService.GetResponse(guid, xmlElement);
+                    log.Info("prepaid getresponse");
+
+                    //Log Response
+                    prePaidResponseDto = _prepaidValidationService.GetResponse(guid, xmlElement);
 
                 return Ok(prePaidResponseDto);
             }
 
+            }
+            catch (Exception ex)
+            {
+                log.Error("Error in Prepaid :", ex);
+            }
 
             return Ok(new PrePaidResponseDto());
 
         }
+
 
     }
 }
