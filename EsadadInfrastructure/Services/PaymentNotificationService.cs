@@ -7,6 +7,9 @@ using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using System.Xml;
 using Esadad.Infrastructure.Enums;
+using Oracle.ManagedDataAccess.Client;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
+using System.Data;
 
 namespace Esadad.Infrastructure.Services
 {
@@ -70,96 +73,157 @@ namespace Esadad.Infrastructure.Services
         {
             try
             {
-                //var existing = _context.TransactionsLogs
-                //                       .FirstOrDefault(a => a.Guid.Equals(guid.ToString())
-                //                                            && a.Type.Equals("Response")
-                //                                            && a.IsPaymentPosted);
+                //check table esadad payment by guid and [IsPaymentPosted] true
+                var existing = _context.EsadadPaymentsLogs
+                                       .FirstOrDefault(a => a.Guid.Equals(guid.ToString())
+                                                          && a.IsPaymentPosted);
 
-                //int procedureResult = 0;
-                //if (existing != null)
-                //{
-                //    existing.Retry += 1;
-                //    _context.SaveChanges();
-                //}
-                //else
-                //{
-                //    var panNoDesc = new SqlParameter("@panNoDesc", billingNumber);
-                //    var paymentAmt = new SqlParameter("@paymentAmt", xmlElement.SelectSingleNode("//PaidAmt")?.InnerText);
-                //    var convertedCurrency = MemoryCache.Biller.Services.First(b => b.ServiceTypeCode == serviceType).Currency.Equals("ILS") ? "NIS" : MemoryCache.Biller.Services.First(b => b.ServiceTypeCode == serviceType).Currency;
+                PaymentNotificationResponseDto response ; 
+                int procedureResult = 0;
+                if (existing != null)
+                {
+                    // existing.Retry += 1;
+                    //  _context.SaveChanges();
 
-                //    var currncyCode = new SqlParameter("@ActCurCd", convertedCurrency);
+                    //fill response
+                    response = new()
+                    {
+                        MsgHeader = new MsgHeader()
+                        {
+                            TmStp = DateTime.Parse(DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss")),
+                            GUID = guid,
+                            TrsInf = new TrsInf
+                            {
+                                SdrCode = MemoryCache.Biller.Code,
+                                ResTyp = "BLRPMTNTFRS"
+                            },
+                            Result = new Result
+                            {
+                                ErrorCode = 0,
+                                ErrorDesc = "Success",
+                                Severity = "Info"
+                            }
+                        },
+                        MsgBody = new PaymentNotificationResponseBody()
+                        {
+                            Transactions = new PaymentNotificationResponseTransactions()
+                            {
+                                TrxInf = new PaymentNotificationResponseTrxInf()
+                                {
+                                    JOEBPPSTrx = paymentNotificationRequestTrxInf.JOEBPPSTrx,
+                                    ProcessDate = paymentNotificationRequestTrxInf.ProcessDate,
+                                    STMTDate = paymentNotificationRequestTrxInf.STMTDate,
+                                    Result = new Result()
+                                    {
+                                        ErrorCode = 0,
+                                        ErrorDesc = "Success",
+                                        Severity = "Info"
+                                    }
+                                }
+                            }
+                        }
+                    };
 
-                //    procedureResult = _context
-                //                        .Database
-                //                        .ExecuteSqlRaw("exec dbo.EsadadPayment @panNoDesc, @paymentAmt, @ActCurCd", panNoDesc, paymentAmt, currncyCode);
-                //}
+                    var msgFooter1 = new MsgFooter()
+                    {
+                        Security = new Security()
+                        {
+                            Signature = DigitalSignature.SignMessage(ObjectToXmlHelper.ObjectToXmlElement(response))
+                        }
+                    };
 
-                //PaymentNotificationResponse response = new()
-                //{
-                //    MsgHeader = new MsgHeader()
-                //    {
-                //        TmStp = DateTime.Parse(DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss")),
-                //        GUID = guid,
-                //        TrsInf = new TrsInf
-                //        {
-                //            SdrCode = MemoryCache.Biller.Code,
-                //            ResTyp = "BLRPMTNTFRS"
-                //        },
-                //        Result = new Result
-                //        {
-                //            ErrorCode = 0,
-                //            ErrorDesc = "Success",
-                //            Severity = "Info"
-                //        }
-                //    },
-                //    MsgBody = new PaymentNotificationResponseBody()
-                //    {
-                //        Transactions = new PaymentNotificationResponseTransactions()
-                //        {
-                //            TrxInf = new PaymentNotificationResponseTrxInf()
-                //            {
-                //                JOEBPPSTrx = paymentNotificationRequestTrxInf.JOEBPPSTrx,
-                //                ProcessDate = paymentNotificationRequestTrxInf.ProcessDate,
-                //                STMTDate = paymentNotificationRequestTrxInf.STMTDate,
-                //                Result = new Result()
-                //                {
-                //                    ErrorCode = 0,
-                //                    ErrorDesc = "Success",
-                //                    Severity = "Info"
-                //                }
-                //            }
-                //        }
-                //    }
-                //};
+                    response.MsgFooter = msgFooter1;
 
-                //var msgFooter = new MsgFooter()
-                //{
-                //    Security = new Security()
-                //    {
-                //        Signature = DigitalSignature.SignMessage(ObjectToXmlHelper.ObjectToXmlElement(response))
-                //    }
-                //};
+                }
+                else
+                {
+                    //both have to be transactions
+                    // create stored procedure to reflect the payment to our local system and update esadad paynmet transaction log is payment posted true (maximum id where guid= ...)
+                    //update [EsadadPaymentsLogs] set [IsPaymentPosted] = true where [Guid] = existing GUID and id = (select MAX(id ) from EsadadPaymentsLogs where [Guid] = existing guid ordery by id desc )
+                    CallUpdatePaymentPostedProcedure(guid);
+                
 
-                //response.MsgFooter = msgFooter;
+                    //add .netcore to execute sp
 
-                //if (existing == null)
-                //{
-                //    var logResult = _commonService.InsertLog(guid.ToString(), billingNumber, serviceType, ObjectToXmlHelper.ObjectToXmlElement(response), "Response");
+                    response = new()
+                    {
+                        MsgHeader = new MsgHeader()
+                        {
+                            TmStp = DateTime.Parse(DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss")),
+                            GUID = guid,
+                            TrsInf = new TrsInf
+                            {
+                                SdrCode = MemoryCache.Biller.Code,
+                                ResTyp = "BLRPMTNTFRS"
+                            },
+                            Result = new Result
+                            {
+                                ErrorCode = 0,
+                                ErrorDesc = "Success",
+                                Severity = "Info"
+                            }
+                        },
+                        MsgBody = new PaymentNotificationResponseBody()
+                        {
+                            Transactions = new PaymentNotificationResponseTransactions()
+                            {
+                                TrxInf = new PaymentNotificationResponseTrxInf()
+                                {
+                                    JOEBPPSTrx = paymentNotificationRequestTrxInf.JOEBPPSTrx,
+                                    ProcessDate = paymentNotificationRequestTrxInf.ProcessDate,
+                                    STMTDate = paymentNotificationRequestTrxInf.STMTDate,
+                                    Result = new Result()
+                                    {
+                                        ErrorCode = 0,
+                                        ErrorDesc = "Success",
+                                        Severity = "Info"
+                                    }
+                                }
+                            }
+                        }
+                    };
 
-                //    if (procedureResult > 0)
-                //    {
-                //        logResult.IsPaymentPosted = true;
+                    var msgFooter = new MsgFooter()
+                    {
+                        Security = new Security()
+                        {
+                            Signature = DigitalSignature.SignMessage(ObjectToXmlHelper.ObjectToXmlElement(response))
+                        }
+                    };
 
-                //        _context.SaveChanges();
-                //    }
-                //}
+                    response.MsgFooter = msgFooter;
 
-                return new PaymentNotificationResponseDto();
+                }
+                if (response != null)
+                {
+                    var logResult = _commonService.InsertLog(TransactionTypeEnum.Response.ToString(), ApiTypeEnum.ReceivePaymentNotification.ToString(), guid.ToString(),  ObjectToXmlHelper.ObjectToXmlElement(response));
+
+                    //if (procedureResult > 0)
+                    //{
+                    //    logResult.IsPaymentPosted = true;
+
+                    //    _context.SaveChanges();
+                    //}
+                }
+
+                return response;
             }
             catch
             {
                 throw;
             }
+        }
+        private void CallUpdatePaymentPostedProcedure(Guid guid)
+        {
+            using var conn = new OracleConnection("User Id=ESADAD; Password=esadad_password; Data Source=localhost:1521/XEPDB1");
+            conn.Open();
+
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = "usp_Update_IsPaymentPosted_ByGUID";
+            cmd.CommandType = CommandType.StoredProcedure;
+
+            cmd.Parameters.Add("p_guid", OracleDbType.Varchar2, 50).Value = guid.ToString();
+            cmd.ExecuteNonQuery();
         }
     }
 }

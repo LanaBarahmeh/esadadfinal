@@ -105,8 +105,13 @@ namespace Esadad.Infrastructure.Services
         }
         public PrePaidResponseDto GetInvalidbillingResponse(Guid guid, string billingNumber, string serviceType, string prepaidCat, int validationCode, int errorcode, string errordesc)
         {
+            decimal dueAmt = prepaidCat switch
+            {
+                "50_ILS" => 60,
+                "100_ILS" => 110,
+                _ => 0
+            };
 
-            
             try
             {
                
@@ -124,8 +129,8 @@ namespace Esadad.Infrastructure.Services
                         },
                         Result = new Result
                         {
-                            ErrorCode = errorcode,
-                            ErrorDesc = errordesc,
+                            ErrorCode = 0,
+                            ErrorDesc = "Success",
                             Severity = "Info"
                         }
                     },
@@ -144,7 +149,7 @@ namespace Esadad.Infrastructure.Services
                                 BillingNo = billingNumber,
                                 BillerCode = MemoryCache.Biller.Code
                             },
-                            DueAmt = 0,
+                            DueAmt = dueAmt,
                             Currency = MemoryCache.Biller.Services.First(b => b.ServiceTypeCode == serviceType).Currency,
                             ValidationCode = validationCode,
                             ServiceTypeDetails = new ServiceTypeDetails()
@@ -155,7 +160,7 @@ namespace Esadad.Infrastructure.Services
                             {
                                 SubPmt = new SubPmt()
                                 {
-                                    Amount = CurrencyHelper.AdjustDecimal(0, MemoryCache.Currencies[MemoryCache.Biller.Services.First(b => b.ServiceTypeCode == serviceType).Currency], DecimalAdjustment.Truncate),
+                                    Amount = CurrencyHelper.AdjustDecimal(dueAmt, MemoryCache.Currencies[MemoryCache.Biller.Services.First(b => b.ServiceTypeCode == serviceType).Currency], DecimalAdjustment.Truncate),
                                     SetBnkCode = MemoryCache.Biller.Services.First(b => b.ServiceTypeCode == serviceType).BankCode,
                                     AcctNo = MemoryCache.Biller.Services.First(b => b.ServiceTypeCode == serviceType).IBAN
                                 }

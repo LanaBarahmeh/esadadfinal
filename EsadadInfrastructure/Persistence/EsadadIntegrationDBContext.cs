@@ -79,7 +79,7 @@ namespace Esadad.Infrastructure.Persistence
             });
             modelBuilder.Entity<EsadadPaymentLog>(entity =>
             {
-                entity.ToTable("ESADADPAYMENTLOGS");
+                entity.ToTable("ESADADPAYMENTSLOGS");
 
                 entity.HasKey(e => e.Id);
 
@@ -106,6 +106,10 @@ namespace Esadad.Infrastructure.Persistence
                     .IsRequired()
                     .HasColumnName("PAIDAMOUNT")
                     .HasColumnType("decimal(12, 3)");
+                entity.Property(e => e.PaidAmt)
+                   .IsRequired()
+                   .HasColumnName("PAIDAMT")
+                   .HasColumnType("decimal(12, 3)");
 
                 entity.Property(e => e.JOEBPPSTrx)
                     .IsRequired()
@@ -123,13 +127,13 @@ namespace Esadad.Infrastructure.Persistence
 
                 entity.Property(e => e.DueAmt)
                     .IsRequired()
-                    .HasColumnName("DUEAMOUNT")
+                    .HasColumnName("DUEAMT")
                     .HasColumnType("decimal(12, 3)");
 
                
 
                 entity.Property(e => e.FeesAmt)
-                    .HasColumnName("FEESAMOUNT")
+                    .HasColumnName("FEESAMT")
                     .HasColumnType("decimal(12, 3)");
 
                 entity.Property(e => e.FeesOnBiller)
@@ -172,7 +176,7 @@ namespace Esadad.Infrastructure.Persistence
                     .HasMaxLength(50);
 
                 entity.Property(e => e.PrepaidCat)
-                    .HasColumnName("PREPAIDCATEGORY")
+                    .HasColumnName("PREPAIDCAT")
                     .HasMaxLength(50);
 
                 entity.Property(e => e.Amount)
@@ -195,11 +199,7 @@ namespace Esadad.Infrastructure.Persistence
                     .HasColumnType("bit")
                     .HasDefaultValue(false);
 
-                entity.Property(e => e.InsertDate)
-                    .IsRequired()
-                    .HasColumnName("INSERTDATE")
-                    .HasColumnType("datetime")
-                    .HasDefaultValueSql("GETDATE()");
+                
             });
 
             base.OnModelCreating(modelBuilder);

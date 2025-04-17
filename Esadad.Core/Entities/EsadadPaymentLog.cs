@@ -101,9 +101,9 @@ namespace Esadad.Core.Entities
         [Column(TypeName = "bit")]
         public bool IsPaymentPosted { get; set; } = false;
 
-        [Required]
-        [Column(TypeName = "datetime")]
-        public DateTime InsertDate { get; set; }= DateTime.Now;
+        //[Required]
+        //[Column(TypeName = "datetime")]
+        //public DateTime InsertDate { get; set; }= DateTime.Now;
        
     }
 }

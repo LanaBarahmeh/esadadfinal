@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Serialization;
 
 namespace Esadad.Infrastructure.DTOs
 {
     [Serializable]
+    [XmlRoot(ElementName = "MFEP")]
     public class PaymentNotificationRequestDto
     {
         public RequestMsgHeader MsgHeader { get; set; }
@@ -15,6 +17,7 @@ namespace Esadad.Infrastructure.DTOs
     }
 
     [Serializable]
+    [XmlRoot(ElementName = "MsgBody")]
     public class PaymNotificationRequestRequestMsgBody
     {
         public PaymNotificationRequestTransactions Transactions { get; set; }

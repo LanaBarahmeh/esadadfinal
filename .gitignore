@@ -9,6 +9,6 @@
 /Esadad.Core/obj/
 /EsadadInfrastructure/bin/
 /EsadadInfrastructure/obj/
-/EsadadAPI/appsettings.json/
-/EsadadAPI/appsettings.Development.json/
+EsadadAPI/appsettings.json/
+EsadadAPI/appsettings.Development.json/
 
