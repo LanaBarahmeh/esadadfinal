@@ -54,7 +54,7 @@ namespace Esadad.Core.Entities
         public decimal? FeesAmt { get; set; }
 
         [Required]
-        [Column(TypeName = "bit")]
+        [Column(TypeName = "NUMBER(1)")]
         public bool FeesOnBiller { get; set; } = false;
 
         [Required]
@@ -98,8 +98,8 @@ namespace Esadad.Core.Entities
         public string AcctNo { get; set; }
 
         [Required]
-        [Column(TypeName = "bit")]
-        public bool IsPaymentPosted { get; set; } = false;
+        [Column(TypeName = "NUMBER(1)")]
+        public bool IsPaymentPosted { get; set; }
 
         //[Required]
         //[Column(TypeName = "datetime")]

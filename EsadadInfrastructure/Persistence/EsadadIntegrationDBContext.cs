@@ -139,7 +139,6 @@ namespace Esadad.Infrastructure.Persistence
                 entity.Property(e => e.FeesOnBiller)
                     .IsRequired()
                     .HasColumnName("FEESONBILLER")
-                    .HasColumnType("bit")
                     .HasDefaultValue(false);
 
                 entity.Property(e => e.ProcessDate)
@@ -196,7 +195,6 @@ namespace Esadad.Infrastructure.Persistence
                 entity.Property(e => e.IsPaymentPosted)
                     .IsRequired()
                     .HasColumnName("ISPAYMENTPOSTED")
-                    .HasColumnType("bit")
                     .HasDefaultValue(false);
 
                 

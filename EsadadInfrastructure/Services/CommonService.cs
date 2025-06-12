@@ -8,6 +8,8 @@ using System.Xml;
 using log4net;
 using log4net.Config;
 using System.Reflection;
+using System.Xml.Linq;
+using System.Text.Json;
 
 namespace Esadad.Infrastructure.Services
 {
@@ -18,9 +20,59 @@ namespace Esadad.Infrastructure.Services
 
         private static readonly ILog log = LogManager.GetLogger("Task");
         private readonly EsadadIntegrationDbContext _context = context;
-        EsadadPaymentLog ICommonService.InsertPaymentLog(string transactionType, string apiName, string guid, XmlElement requestElement)
+        EsadadPaymentLog ICommonService.InsertPaymentLog(XmlElement xmlElement , Guid guid)
         {
-            throw new NotImplementedException();
+            try
+            {
+                EsadadPaymentLog esadadPaymentLog = null;
+
+
+             
+                        log.Info("Deserializing ReceivePaymentNotification request...");
+                        var paymentNotificationRequestDtoObj = XmlToObjectHelper.DeserializeXmlToObject(xmlElement, new PaymentNotificationRequestDto());
+                        esadadPaymentLog = new EsadadPaymentLog
+                        {
+                            
+                            Guid = guid.ToString(),
+                            BillingNumber = paymentNotificationRequestDtoObj.MsgBody.Transactions.TrxInf.AcctInfo.BillingNo,
+                            BillNumber = paymentNotificationRequestDtoObj.MsgBody.Transactions.TrxInf.AcctInfo.BillNo,
+                            ServiceType = paymentNotificationRequestDtoObj.MsgBody.Transactions.TrxInf.ServiceTypeDetails.ServiceType,
+                            Currency = MemoryCache.Biller.Services.First(b => b.ServiceTypeCode == paymentNotificationRequestDtoObj.MsgBody.Transactions.TrxInf.ServiceTypeDetails.ServiceType).Currency,
+                        
+                            PrepaidCat = paymentNotificationRequestDtoObj.MsgBody.Transactions.TrxInf.ServiceTypeDetails.PrepaidCat,
+                            JOEBPPSTrx = paymentNotificationRequestDtoObj.MsgBody.Transactions.TrxInf.JOEBPPSTrx.ToString(),
+                            BankTrxID = paymentNotificationRequestDtoObj.MsgBody.Transactions.TrxInf.BankTrxID.ToString(),
+                            BankCode = paymentNotificationRequestDtoObj.MsgBody.Transactions.TrxInf.BankCode,
+                            IsPaymentPosted = false,
+                            DueAmt = paymentNotificationRequestDtoObj.MsgBody.Transactions.TrxInf.DueAmt,
+                            PaidAmt = paymentNotificationRequestDtoObj.MsgBody.Transactions.TrxInf.PaidAmt,
+                            FeesAmt = paymentNotificationRequestDtoObj.MsgBody.Transactions.TrxInf.FeesAmt,
+                            FeesOnBiller = paymentNotificationRequestDtoObj.MsgBody.Transactions.TrxInf.FeesOnBiller,
+                            ProcessDate = paymentNotificationRequestDtoObj.MsgBody.Transactions.TrxInf.ProcessDate,
+                            STMTDate = paymentNotificationRequestDtoObj.MsgBody.Transactions.TrxInf.STMTDate,
+                            AccessChannel = paymentNotificationRequestDtoObj.MsgBody.Transactions.TrxInf.AccessChannel,
+                            PaymentMethod = paymentNotificationRequestDtoObj.MsgBody.Transactions.TrxInf.PaymentMethod,
+                            PaymentType = paymentNotificationRequestDtoObj.MsgBody.Transactions.TrxInf.PaymentType,
+                            AcctNo = paymentNotificationRequestDtoObj.MsgBody.Transactions.TrxInf.SubPmts.SubPmt.AcctNo
+
+                        };
+
+                var requestToJSONbject = JsonSerializer.Serialize(paymentNotificationRequestDtoObj);
+                log.Info("Request:   " + requestToJSONbject);
+
+              
+                var query = _context.EsadadPaymentsLogs.Add(esadadPaymentLog).Entity;
+
+                _context.SaveChanges();
+
+                log.Info("Log saved successfully.");
+                return query;
+            }
+            catch (Exception ex)
+            {
+                log.Error("Error in InsertLog", ex);
+                throw;
+            }
         }
     public EsadadTransactionLog InsertLog(string transactionType, string apiName, string guid, XmlElement xmlElement, Object responseObject = null)
         {
@@ -187,10 +239,7 @@ namespace Esadad.Infrastructure.Services
                 throw;
             }
 
-            //EsadadTransactionLog ICommonService.InsertLog(string transactionType, string apiName, string guid, XmlElement requestElement, object responseObject)
-            //{
-            //    throw new NotImplementedException();
-            //}
+           
 
               
 

@@ -1,9 +1,13 @@
-﻿using Esadad.Infrastructure.DTOs;
+﻿using Azure.Core;
+using Esadad.Infrastructure.DTOs;
 using Esadad.Infrastructure.Enums;
 using Esadad.Infrastructure.Helpers;
 using Esadad.Infrastructure.Interfaces;
+using log4net;
+using log4net.Core;
 using Microsoft.AspNetCore.Mvc;
 using System.Xml;
+using System.Text.Json;
 
 namespace EsadadAPI.Controllers
 {
@@ -15,6 +19,7 @@ namespace EsadadAPI.Controllers
     {
         private readonly IPaymentNotificationService _paymentNotificationService;
         private readonly ICommonService _commonService;
+        private static readonly ILog log = LogManager.GetLogger("Task");
 
         public PaymentController(IPaymentNotificationService paymentNotificationService, ICommonService commonService)
         {
@@ -32,13 +37,15 @@ namespace EsadadAPI.Controllers
             string? serviceType = xmlElement.SelectSingleNode("//ServiceType")?.InnerText;
 
             //Log to EsadadTransactionsLogs Table
+            //var requestToJSONbject = JsonSerializer.Serialize(xmlElement);
+            //log.Info("Request:   " + requestToJSONbject);
 
 
             var tranLog = _commonService.InsertLog(TransactionTypeEnum.Request.ToString(), ApiTypeEnum.ReceivePaymentNotification.ToString(), guid.ToString(), xmlElement);
 
 
             //Log to EsadadOaymentsLogs Table
-
+            var paymentLog = _commonService.InsertPaymentLog(xmlElement,guid);
             PaymentNotificationResponseDto paymentNotificationResponse;
 
             if (!DigitalSignature.VerifySignature(xmlElement))

@@ -1,5 +1,5 @@
 ﻿using Esadad.Core.Entities;
-
+using Esadad.Infrastructure.DTOs;
 using System.Xml;
 
 namespace Esadad.Infrastructure.Interfaces
@@ -8,9 +8,7 @@ namespace Esadad.Infrastructure.Interfaces
     {
         EsadadTransactionLog InsertLog(string transactionType, string apiName, string guid,
                                 XmlElement requestElement, Object responseObject=null);
-
-        EsadadPaymentLog InsertPaymentLog(string transactionType, string apiName, string guid,
-                               XmlElement requestElement);
+        EsadadPaymentLog InsertPaymentLog(XmlElement xmlElement, Guid guid);
 
     }
 }

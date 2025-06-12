@@ -109,7 +109,7 @@ namespace Esadad.Infrastructure.Services
             {
                 "50_ILS" => 60,
                 "100_ILS" => 110,
-                _ => 0
+                
             };
 
             try
@@ -222,9 +222,8 @@ namespace Esadad.Infrastructure.Services
                 }
                 decimal dueAmt = prepaidCat switch
                 {
-                    "50_ILS" => 60,
-                    "100_ILS" => 110,
-                    _ => 0
+                    "50_ILS" => 50,
+                    "100_ILS" => 100
                 };
 
                 var response = new PrePaidResponseDto()
@@ -277,6 +276,11 @@ namespace Esadad.Infrastructure.Services
                                     SetBnkCode = service.BankCode,
                                     AcctNo = service.IBAN
                                 }
+                            },
+                            AdditionalInfo = new AdditionalInfo()
+                            {
+                                CustName = "لانا جمال محمد براهمة",
+                                FreeText = "عزيزي المستخدم، يوجد مبلغ مستحق، يرجى المتابعة لإتمام عملية الدفع، شكراً لاستخدامك خدمة إي سداد, للاستفسار يرجى التواصل على الرقم"
                             }
                         }
                     }
